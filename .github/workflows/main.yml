@@ -1,0 +1,47 @@
+name: HTML CI Workflow
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Клонування репозиторію
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Встановлення Node.js (оскільки для HTML-тестів часто потрібні npm-пакети)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Встановлення залежностей (якщо є package.json)
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found. Skipping dependency installation."
+          fi
+
+      # Збірка проєкту (якщо є, наприклад, gulp, webpack або інші інструменти)
+      - name: Build project
+        run: |
+          if [ -f package.json ] && [ -f gulpfile.js ]; then
+            npm run build
+          else
+            echo "No build step defined. Skipping build."
+          fi
+
+      # Запуск юніт-тестів (наприклад, через Jest, Mocha тощо)
+      - name: Run unit tests
+        run: |
+          if [ -f package.json ]; then
+            npm test || echo "No tests found or test script not defined."
+          else
+            echo "No package.json, skipping tests."
+          fi
